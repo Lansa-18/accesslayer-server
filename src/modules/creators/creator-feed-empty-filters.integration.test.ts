@@ -393,6 +393,55 @@ describe('GET /api/v1/creators — empty feed with filter combinations', () => {
       }
    });
 
+   // ── Null Items Normalization (issue #281) ──────────────────────────────────
+
+   it('coerces null items from fetchCreatorList to an empty array', async () => {
+      jest.spyOn(creatorsUtils, 'fetchCreatorList').mockResolvedValue([null as unknown as any[], 0]);
+      const req = makeReq();
+      const res = makeRes();
+      await httpListCreators(req, res, makeNext());
+
+      const body = res.json.mock.calls[0][0];
+      expect(body.success).toBe(true);
+      expect(Array.isArray(body.data.items)).toBe(true);
+      expect(body.data.items).toHaveLength(0);
+   });
+
+   it('coerces undefined items from fetchCreatorList to an empty array', async () => {
+      jest.spyOn(creatorsUtils, 'fetchCreatorList').mockResolvedValue([undefined as unknown as any[], 0]);
+      const req = makeReq();
+      const res = makeRes();
+      await httpListCreators(req, res, makeNext());
+
+      const body = res.json.mock.calls[0][0];
+      expect(body.success).toBe(true);
+      expect(Array.isArray(body.data.items)).toBe(true);
+      expect(body.data.items).toHaveLength(0);
+   });
+
+   it('items is always an array regardless of filter combination when data layer returns null', async () => {
+      jest.spyOn(creatorsUtils, 'fetchCreatorList').mockResolvedValue([null as unknown as any[], 0]);
+      const filterCombinations: Array<Record<string, string>> = [
+         { verified: 'true' },
+         { search: 'artist' },
+         { verified: 'false', search: 'test' },
+         { limit: '5', offset: '10', verified: 'true' },
+      ];
+
+      for (const query of filterCombinations) {
+         const req = makeReq(query);
+         const res = makeRes();
+         await httpListCreators(req, res, makeNext());
+
+         const body = res.json.mock.calls[0][0];
+         expect(Array.isArray(body.data.items)).toBe(true);
+         expect(body.data.items).toHaveLength(0);
+
+         jest.clearAllMocks();
+         jest.spyOn(creatorsUtils, 'fetchCreatorList').mockResolvedValue([null as unknown as any[], 0]);
+      }
+   });
+
    // ── Validation Error Handling ───────────────────────────────────────────────
 
    it('returns 400 for invalid limit parameter', async () => {
