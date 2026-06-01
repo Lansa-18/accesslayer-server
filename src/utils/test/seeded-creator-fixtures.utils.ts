@@ -28,6 +28,7 @@ export function createSeededCreatorFixture(
    const normalizedSeed = Math.max(0, Math.floor(seed));
    const createdAt = new Date(CREATOR_FIXTURE_BASE_DATE);
    createdAt.setUTCDate(createdAt.getUTCDate() + normalizedSeed);
+   const finalCreatedAt = overrides.createdAt ?? createdAt;
 
    return {
       id: `creator-${normalizedSeed}`,
@@ -39,8 +40,9 @@ export function createSeededCreatorFixture(
       perkSummary: `Perks for creator ${normalizedSeed}`,
       perks: [],
       isVerified: normalizedSeed % 2 === 0,
-      createdAt,
-      updatedAt: new Date(createdAt.getTime() + 1000),
+      createdAt: finalCreatedAt,
+      updatedAt:
+         overrides.updatedAt ?? new Date(finalCreatedAt.getTime() + 1000),
       ...overrides,
    };
 }

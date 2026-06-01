@@ -34,4 +34,12 @@ describe('createSeededCreatorFixture', () => {
          fixture.createdAt.getTime() + 1000
       );
    });
+
+   it('respects overridden createdAt when deriving updatedAt', () => {
+      const customDate = new Date('2025-01-01T00:00:00.000Z');
+      const fixture = createSeededCreatorFixture(4, { createdAt: customDate });
+
+      expect(fixture.createdAt).toEqual(customDate);
+      expect(fixture.updatedAt.getTime()).toBe(customDate.getTime() + 1000);
+   });
 });
