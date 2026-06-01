@@ -24,7 +24,10 @@ function makeRes(): any {
       headers[name.toLowerCase()] = value;
       return res;
    });
-   res.set = jest.fn().mockReturnValue(res);
+   res.set = jest.fn().mockImplementation((name: string, value: string) => {
+      headers[name.toLowerCase()] = value;
+      return res;
+   });
    res._headers = headers;
    return res;
 }
@@ -107,7 +110,7 @@ describe('GET /api/v1/creators/:creatorId/profile — cache headers', () => {
       expect(cacheControlCalls[0][1]).toBe(upstreamValue);
    });
 
-   it('returns HTTP 200 alongside the cache header for a found profile', async () => {
+   it('returns HTTP 200 alongside the cache header and response timestamp for a found profile', async () => {
       jest.spyOn(creatorProfileService, 'getCreatorProfile').mockResolvedValue(FIXTURE_PROFILE);
 
       const req = makeReq({ creatorId: 'creator-abc' });
@@ -118,5 +121,14 @@ describe('GET /api/v1/creators/:creatorId/profile — cache headers', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res._headers['cache-control']).toBeDefined();
+      expect(res._headers['x-response-timestamp']).toMatch(
+         /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+      );
+      expect(res.json).toHaveBeenCalledWith(
+         expect.objectContaining({
+            success: true,
+            data: FIXTURE_PROFILE,
+         })
+      );
    });
 });

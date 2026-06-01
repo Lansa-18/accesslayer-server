@@ -2,6 +2,8 @@
 
 The indexer processes events from the blockchain to update the read models and activity feeds. To ensure data consistency and prevent duplicate processing, the following strategies are employed.
 
+Before changing this pipeline, review [Indexer Contributor Expectations](./CONTRIBUTOR_EXPECTATIONS.md) for the invariants, testing expectations, and deployment notes that apply to indexer work.
+
 ## 1. Deduplication
 
 Before processing a batch of events, they should be deduped based on their unique identifier on the chain: `transactionHash` and `eventIndex`.

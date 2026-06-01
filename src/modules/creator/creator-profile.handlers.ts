@@ -6,6 +6,7 @@ import {
    zodIssuesToDetails,
    ErrorCode,
 } from '../../utils/api-response.utils';
+import { attachTimestampHeader } from '../../utils/timestamp-headers.utils';
 import { logger } from '../../utils/logger.utils';
 import {
    CreatorProfileParamsSchema,
@@ -36,6 +37,7 @@ export async function getCreatorProfileHandler(req: Request, res: Response) {
       }
 
       const profile = await getCreatorProfile(paramsResult.data.creatorId);
+      attachTimestampHeader(res);
       return sendSuccess(res, profile, 200, 'Creator profile retrieved');
    } catch (error) {
       logger.error(
