@@ -26,7 +26,8 @@ import { buildOffsetPaginationMeta } from '../../utils/pagination.utils';
  */
 export const httpGetCreatorHolders: AsyncController = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params['id'];
+    const id = typeof rawId === 'string' ? rawId : String(rawId ?? '');
 
     const parsed = parsePublicQuery(CreatorHoldersQuerySchema, req.query, {
       debugContext: 'creator-holders-query',
